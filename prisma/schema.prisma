@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Checkin {
+  id        String   @id
+  studentId String
+  eventId   String
+  createdAt DateTime @default(now())
+  Event     Event    @relation(fields: [eventId], references: [id])
+
+  @@unique([studentId, eventId])
+}
+
+model Client {
+  id            String    @id
+  macAddress    String
+  alias         String
+  eventId       String?
+  lastHeartbeat DateTime?
+  status        Boolean
+  Event         Event?    @relation(fields: [eventId], references: [id])
+}
+
+model Event {
+  id          String     @id
+  alias       String
+  description String?
+  points      Int        @default(0)
+  Checkin     Checkin[]
+  Client      Client[]
+  Giveaway    Giveaway[]
+  Reward      Reward[]
+}
+
+model Giveaway {
+  id        String   @id
+  eventId   String
+  startTime DateTime
+  endTime   DateTime
+  message   String
+  password  String
+  Event     Event    @relation(fields: [eventId], references: [id])
+}
+
+model Reward {
+  id           String       @id
+  name         String
+  description  String?
+  instructions String?
+  defaultUses  Int
+  imageUrl     String?
+  UserReward   UserReward[]
+  Event        Event[]
+}
+
+model RewardTier {
+  id          String   @id
+  name        String
+  description String
+  color       String
+  minPoints   Int
+  rewards     String[]
+  User        User[]
+}
+
+model Role {
+  id   String @id
+  name String
+  User User[]
+}
+
+model User {
+  id           String       @id
+  studentId    String
+  email        String
+  name         String?
+  rewardTierId String?
+  rewardPoints Int          @default(0)
+  RewardTier   RewardTier?  @relation(fields: [rewardTierId], references: [id])
+  UserReward   UserReward[]
+  Role         Role[]
+}
+
+model UserReward {
+  id            String @id
+  userId        String
+  rewardId      String
+  remainingUses Int    @default(1)
+  Reward        Reward @relation(fields: [rewardId], references: [id])
+  User          User   @relation(fields: [userId], references: [id])
+}
