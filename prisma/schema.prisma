@@ -8,90 +8,90 @@ datasource db {
 }
 
 model Checkin {
-  id        String   @id
+  id        String   @id @default(uuid())
   studentId String
   eventId   String
   createdAt DateTime @default(now())
-  Event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
 
   @@unique([studentId, eventId])
 }
 
+model Event {
+  id          String     @id @default(uuid())
+  alias       String
+  description String?
+  points      Int        @default(0)
+  checkin     Checkin[]
+  client      Client[]
+  giveaway    Giveaway[]
+  rewards     Reward[]   @relation("EventToReward")
+}
+
 model Client {
-  id            String    @id
+  id            String    @id @default(uuid())
   macAddress    String
   alias         String
   eventId       String?
   lastHeartbeat DateTime?
   status        Boolean
-  Event         Event?    @relation(fields: [eventId], references: [id])
-}
-
-model Event {
-  id          String     @id
-  alias       String
-  description String?
-  points      Int        @default(0)
-  Checkin     Checkin[]
-  Client      Client[]
-  Giveaway    Giveaway[]
-  Reward      Reward[]
+  event         Event?    @relation(fields: [eventId], references: [id])
 }
 
 model Giveaway {
-  id        String   @id
+  id        String   @id @default(uuid())
   eventId   String
   startTime DateTime
   endTime   DateTime
   message   String
   password  String
-  Event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
 }
 
 model Reward {
-  id           String       @id
+  id           String       @id @default(uuid())
   name         String
   description  String?
   instructions String?
   defaultUses  Int
   imageUrl     String?
-  UserReward   UserReward[]
-  Event        Event[]
+  userRewards  UserReward[]
+  event        Event[]      @relation("EventToReward")
 }
 
 model RewardTier {
-  id          String   @id
+  id          String   @id @default(uuid())
   name        String
   description String
   color       String
   minPoints   Int
   rewards     String[]
-  User        User[]
-}
-
-model Role {
-  id   String @id
-  name String
-  User User[]
+  users       User[]
 }
 
 model User {
-  id           String       @id
+  id           String       @id @default(uuid())
   studentId    String
   email        String
   name         String?
   rewardTierId String?
   rewardPoints Int          @default(0)
-  RewardTier   RewardTier?  @relation(fields: [rewardTierId], references: [id])
-  UserReward   UserReward[]
-  Role         Role[]
+  rewardTier   RewardTier?  @relation(fields: [rewardTierId], references: [id])
+  rewards      UserReward[]
+  roles        Role[]       @relation("RoleToUser")
+}
+
+model Role {
+  id   String @id @default(uuid())
+  name String
+  user User[] @relation("RoleToUser")
 }
 
 model UserReward {
-  id            String @id
+  id            String @id @default(uuid())
   userId        String
   rewardId      String
   remainingUses Int    @default(1)
-  Reward        Reward @relation(fields: [rewardId], references: [id])
-  User          User   @relation(fields: [userId], references: [id])
+  reward        Reward @relation(fields: [rewardId], references: [id])
+  user          User   @relation(fields: [userId], references: [id])
 }
