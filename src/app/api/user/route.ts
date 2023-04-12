@@ -1,16 +1,16 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma'
-import { User } from '@prisma/client';
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { User } from "@prisma/client";
 
-const res = NextResponse
+const res = NextResponse;
 
 /**
  * Get all users.
  * GET /user
  */
 export async function GET() {
-  const users = await prisma.user.findMany()
-  return res.json(users)
+  const users = await prisma.user.findMany();
+  return res.json(users);
 }
 
 /**
@@ -26,7 +26,7 @@ export async function GET() {
  * }
  */
 export async function POST(req: Request){
-  const { email, name, studentId, rewardPoints } = await req.json()
+  const { email, name, studentId, rewardPoints } = await req.json();
 
   try {
     const user = await prisma.user.create({
@@ -36,8 +36,8 @@ export async function POST(req: Request){
         studentId: studentId,
         rewardPoints: parseInt(rewardPoints),
       }
-    })
-    return res.json(user)
+    });
+    return res.json(user);
   } catch (e) {
     console.error(e);
     return new res(e as string, {
